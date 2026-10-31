@@ -24,11 +24,12 @@ import {
 import { fetchIngredients } from '@slices/ingredients-slice';
 import { Preloader } from '@ui';
 import { useEffect } from 'react';
-import { Routes, Route, useNavigate } from 'react-router-dom';
+import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 
 import { useDispatch, useSelector } from '@services/store';
 
 import type { AppContentProps } from './type';
+import type { Location } from 'react-router-dom';
 
 import '../../index.css';
 
@@ -89,41 +90,51 @@ const AppContent = ({
 
 const RouteComponent = (): React.JSX.Element => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const background = (location.state as { background?: Location } | null)?.background;
+
   const handleClose = (): void => {
     void navigate(-1);
   };
 
-  return (
+  // Маршруты-модалки нужны в двух местах, поэтому описаны один раз
+  const modalRoutes = (
     <>
-      <Routes>
-        <Route path="/" element={<ConstructorPage />} />
-        <Route path="/feed" element={<Feed />} />
-        <Route
-          path="/feed/:number"
-          element={
+      <Route
+        path="/feed/:number"
+        element={
+          <Modal title="" onClose={handleClose}>
+            <OrderInfo />
+          </Modal>
+        }
+      />
+      <Route
+        path="/ingredients/:id"
+        element={
+          <Modal title="Детали ингредиента" onClose={handleClose}>
+            <IngredientDetails />
+          </Modal>
+        }
+      />
+      <Route
+        path="/profile/orders/:number"
+        element={
+          <ProtectedRoute>
             <Modal title="" onClose={handleClose}>
               <OrderInfo />
             </Modal>
-          }
-        />
-        <Route
-          path="/ingredients/:id"
-          element={
-            <Modal title="Детали ингредиента" onClose={handleClose}>
-              <IngredientDetails />
-            </Modal>
-          }
-        />
-        <Route
-          path="/profile/orders/:number"
-          element={
-            <ProtectedRoute>
-              <Modal title="" onClose={handleClose}>
-                <OrderInfo />
-              </Modal>
-            </ProtectedRoute>
-          }
-        />
+          </ProtectedRoute>
+        }
+      />
+    </>
+  );
+
+  return (
+    <>
+      <Routes location={background ?? location}>
+        <Route path="/" element={<ConstructorPage />} />
+        <Route path="/feed" element={<Feed />} />
+        {modalRoutes}
         <Route
           path="/login"
           element={
@@ -174,6 +185,8 @@ const RouteComponent = (): React.JSX.Element => {
         />
         <Route path="*" element={<NotFound404 />} />
       </Routes>
+
+      {background && <Routes>{modalRoutes}</Routes>}
     </>
   );
 };
