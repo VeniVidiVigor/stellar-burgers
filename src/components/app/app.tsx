@@ -24,7 +24,7 @@ import {
 import { fetchIngredients } from '@slices/ingredients-slice';
 import { Preloader } from '@ui';
 import { useEffect } from 'react';
-import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
+import { Routes, Route, useLocation, useNavigate, useParams } from 'react-router-dom';
 
 import { useDispatch, useSelector } from '@services/store';
 
@@ -59,8 +59,6 @@ const App = (): React.JSX.Element => {
 
 export default App;
 
-/* Маршруты показываются только когда ингредиенты загружены: без них не
-   отрисовать ни конструктор, ни состав заказа. */
 const AppContent = ({
   ingredients,
   isLoading,
@@ -88,6 +86,16 @@ const AppContent = ({
   return <RouteComponent />;
 };
 
+const OrderModal = ({ onClose }: { onClose: () => void }): React.JSX.Element => {
+  const { number } = useParams();
+
+  return (
+    <Modal title={`#${(number ?? '').padStart(6, '0')}`} onClose={onClose}>
+      <OrderInfo />
+    </Modal>
+  );
+};
+
 const RouteComponent = (): React.JSX.Element => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -97,17 +105,9 @@ const RouteComponent = (): React.JSX.Element => {
     void navigate(-1);
   };
 
-  // Маршруты-модалки нужны в двух местах, поэтому описаны один раз
   const modalRoutes = (
     <>
-      <Route
-        path="/feed/:number"
-        element={
-          <Modal title="" onClose={handleClose}>
-            <OrderInfo />
-          </Modal>
-        }
-      />
+      <Route path="/feed/:number" element={<OrderModal onClose={handleClose} />} />
       <Route
         path="/ingredients/:id"
         element={
@@ -120,9 +120,7 @@ const RouteComponent = (): React.JSX.Element => {
         path="/profile/orders/:number"
         element={
           <ProtectedRoute>
-            <Modal title="" onClose={handleClose}>
-              <OrderInfo />
-            </Modal>
+            <OrderModal onClose={handleClose} />
           </ProtectedRoute>
         }
       />
