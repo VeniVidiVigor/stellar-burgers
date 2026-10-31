@@ -22,6 +22,7 @@ import {
   selectIngredientsLoading,
 } from '@selectors/ingredients-selectors';
 import { fetchIngredients } from '@slices/ingredients-slice';
+import { checkUserAuth } from '@slices/user-slice';
 import { Preloader } from '@ui';
 import { useEffect } from 'react';
 import { Routes, Route, useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -43,6 +44,7 @@ const App = (): React.JSX.Element => {
 
   useEffect(() => {
     void dispatch(fetchIngredients());
+    void dispatch(checkUserAuth());
   }, [dispatch]);
 
   return (
