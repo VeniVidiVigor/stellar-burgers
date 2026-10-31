@@ -1,4 +1,10 @@
-import { AppHeader, ProtectedRoute } from '@components';
+import {
+  AppHeader,
+  ProtectedRoute,
+  Modal,
+  OrderInfo,
+  IngredientDetails,
+} from '@components';
 import {
   ConstructorPage,
   Feed,
@@ -11,7 +17,7 @@ import {
   ResetPassword,
 } from '@pages';
 import { Preloader } from '@ui';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useNavigate } from 'react-router-dom';
 
 import type { AppContentProps } from './type';
 import type { TIngredient } from '@utils-types';
@@ -69,12 +75,42 @@ const AppContent = ({
 };
 
 const RouteComponent = (): React.JSX.Element => {
+  const navigate = useNavigate();
+  const handleClose = (): void => {
+    void navigate(-1);
+  };
+
   return (
     <>
       <Routes>
         <Route path="/" element={<ConstructorPage />} />
         <Route path="/feed" element={<Feed />} />
-
+        <Route
+          path="/feed/:number"
+          element={
+            <Modal title="" onClose={handleClose}>
+              <OrderInfo />
+            </Modal>
+          }
+        />
+        <Route
+          path="/ingredients/:id"
+          element={
+            <Modal title="Детали ингредиента" onClose={handleClose}>
+              <IngredientDetails />
+            </Modal>
+          }
+        />
+        <Route
+          path="/profile/orders/:number"
+          element={
+            <ProtectedRoute>
+              <Modal title="" onClose={handleClose}>
+                <OrderInfo />
+              </Modal>
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/login"
           element={
@@ -107,7 +143,6 @@ const RouteComponent = (): React.JSX.Element => {
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/profile"
           element={
@@ -124,7 +159,6 @@ const RouteComponent = (): React.JSX.Element => {
             </ProtectedRoute>
           }
         />
-
         <Route path="*" element={<NotFound404 />} />
       </Routes>
     </>
