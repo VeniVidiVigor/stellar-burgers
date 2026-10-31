@@ -1,4 +1,4 @@
-import { AppHeader } from '@components';
+import { AppHeader, ProtectedRoute } from '@components';
 import {
   ConstructorPage,
   Feed,
@@ -74,13 +74,58 @@ const RouteComponent = (): React.JSX.Element => {
       <Routes>
         <Route path="/" element={<ConstructorPage />} />
         <Route path="/feed" element={<Feed />} />
+
+        <Route
+          path="/login"
+          element={
+            <ProtectedRoute onlyUnAuth>
+              <Login />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/register"
+          element={
+            <ProtectedRoute onlyUnAuth>
+              <Register />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/forgot-password"
+          element={
+            <ProtectedRoute onlyUnAuth>
+              <ForgotPassword />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/reset-password"
+          element={
+            <ProtectedRoute onlyUnAuth>
+              <ResetPassword />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile/orders"
+          element={
+            <ProtectedRoute>
+              <ProfileOrders />
+            </ProtectedRoute>
+          }
+        />
+
         <Route path="*" element={<NotFound404 />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/profile-orders" element={<ProfileOrders />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
       </Routes>
     </>
   );
