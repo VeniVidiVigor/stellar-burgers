@@ -24,7 +24,6 @@ const burgerConstructorSlice = createSlice({
           state.ingredients.push(action.payload);
         }
       },
-      // Уникальный id нужен, чтобы отличать одинаковые начинки друг от друга
       prepare: (ingredient: TIngredient) => ({
         payload: { ...ingredient, id: nanoid() },
       }),
@@ -48,7 +47,6 @@ const burgerConstructorSlice = createSlice({
         state.ingredients[index],
       ];
     },
-    // Понадобится на шаге 10, после оформления заказа
     resetConstructor: () => initialState,
   },
 });
