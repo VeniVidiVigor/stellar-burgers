@@ -98,6 +98,28 @@ const OrderModal = ({ onClose }: { onClose: () => void }): React.JSX.Element => 
   );
 };
 
+const IngredientPage = (): React.JSX.Element => (
+  <div className={styles.detailPageWrap}>
+    <h3 className={`${styles.detailHeader} text text_type_main-large`}>
+      Детали ингредиента
+    </h3>
+    <IngredientDetails />
+  </div>
+);
+
+const OrderPage = (): React.JSX.Element => {
+  const { number } = useParams();
+
+  return (
+    <div className={styles.detailPageWrap}>
+      <h3 className={`${styles.detailHeader} text text_type_digits-default`}>
+        #{(number ?? '').padStart(6, '0')}
+      </h3>
+      <OrderInfo />
+    </div>
+  );
+};
+
 const RouteComponent = (): React.JSX.Element => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -134,7 +156,8 @@ const RouteComponent = (): React.JSX.Element => {
       <Routes location={background ?? location}>
         <Route path="/" element={<ConstructorPage />} />
         <Route path="/feed" element={<Feed />} />
-        {modalRoutes}
+        <Route path="/feed/:number" element={<OrderPage />} />
+        <Route path="/ingredients/:id" element={<IngredientPage />} />
         <Route
           path="/login"
           element={
@@ -180,6 +203,14 @@ const RouteComponent = (): React.JSX.Element => {
           element={
             <ProtectedRoute>
               <ProfileOrders />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile/orders/:number"
+          element={
+            <ProtectedRoute>
+              <OrderPage />
             </ProtectedRoute>
           }
         />
