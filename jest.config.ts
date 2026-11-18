@@ -5,6 +5,11 @@ const config: Config = {
   testEnvironment: 'node',
   roots: ['<rootDir>/src'],
   testMatch: ['**/*.test.ts'],
+  collectCoverageFrom: [
+    'src/services/slices/**/*.ts',
+    '!src/services/slices/**/__tests__/**',
+  ],
+  coverageDirectory: 'coverage',
   moduleNameMapper: {
     '^@api$': '<rootDir>/src/utils/burger-api',
     '^@api/(.*)$': '<rootDir>/src/utils/burger-api/$1',
