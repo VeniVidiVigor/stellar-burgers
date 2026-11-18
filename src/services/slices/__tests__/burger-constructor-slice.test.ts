@@ -6,11 +6,13 @@ import {
   removeIngredient,
   resetConstructor,
 } from '@slices/burger-constructor-slice';
+import { createOrder } from '@slices/orders-slice';
 
 import type {
   TConstructorIngredient,
   TConstructorState,
   TIngredient,
+  TOrder,
 } from '@utils-types';
 
 const emptyState: TConstructorState = {
@@ -47,6 +49,21 @@ const stateWithThreeItems: TConstructorState = {
     makeConstructorIngredient('id-2'),
     makeConstructorIngredient('id-3'),
   ],
+};
+
+const mockOrder: TOrder = {
+  _id: 'order-1',
+  status: 'done',
+  name: 'Тестовый бургер',
+  createdAt: '2026-11-17T10:00:00.000Z',
+  updatedAt: '2026-11-17T10:00:00.000Z',
+  number: 12345,
+  ingredients: ['bun-1', 'ingredient-id-1', 'bun-1'],
+};
+
+const filledState: TConstructorState = {
+  bun: makeConstructorIngredient('bun-id', 'bun'),
+  ingredients: stateWithThreeItems.ingredients,
 };
 
 const getIds = (state: TConstructorState): string[] =>
@@ -155,14 +172,38 @@ describe('burgerConstructorReducer', () => {
 
   describe('resetConstructor', () => {
     it('возвращает конструктор в пустое состояние', () => {
-      const filledState: TConstructorState = {
-        bun: makeConstructorIngredient('bun-id', 'bun'),
-        ingredients: stateWithThreeItems.ingredients,
-      };
-
       const result = burgerConstructorReducer(filledState, resetConstructor());
 
       expect(result).toEqual(emptyState);
+    });
+  });
+
+  describe('createOrder', () => {
+    it('createOrder.pending не меняет конструктор', () => {
+      const result = burgerConstructorReducer(
+        filledState,
+        createOrder.pending('request-id', ['bun-1'])
+      );
+
+      expect(result).toEqual(filledState);
+    });
+
+    it('createOrder.fulfilled очищает конструктор', () => {
+      const result = burgerConstructorReducer(
+        filledState,
+        createOrder.fulfilled(mockOrder, 'request-id', ['bun-1'])
+      );
+
+      expect(result).toEqual(emptyState);
+    });
+
+    it('createOrder.rejected не меняет конструктор', () => {
+      const result = burgerConstructorReducer(
+        filledState,
+        createOrder.rejected(new Error('Ошибка заказа'), 'request-id', ['bun-1'])
+      );
+
+      expect(result).toEqual(filledState);
     });
   });
 });

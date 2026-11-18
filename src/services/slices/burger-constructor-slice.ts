@@ -1,4 +1,5 @@
 import { createSlice, nanoid } from '@reduxjs/toolkit';
+import { createOrder } from '@slices/orders-slice';
 
 import type { PayloadAction } from '@reduxjs/toolkit';
 import type {
@@ -48,6 +49,9 @@ const burgerConstructorSlice = createSlice({
       ];
     },
     resetConstructor: () => initialState,
+  },
+  extraReducers: (builder) => {
+    builder.addCase(createOrder.fulfilled, () => initialState);
   },
 });
 

@@ -1,7 +1,6 @@
 import { selectConstructorItems } from '@selectors/burger-constructor-selectors';
 import { selectNewOrder, selectOrderRequest } from '@selectors/orders-selectors';
 import { selectUser } from '@selectors/user-selectors';
-import { resetConstructor } from '@slices/burger-constructor-slice';
 import { clearNewOrder, createOrder } from '@slices/orders-slice';
 import { BurgerConstructorUI } from '@ui';
 import { useMemo } from 'react';
@@ -38,7 +37,6 @@ export const BurgerConstructor = (): React.JSX.Element | null => {
 
   const closeOrderModal = (): void => {
     dispatch(clearNewOrder());
-    dispatch(resetConstructor());
   };
 
   const price = useMemo(

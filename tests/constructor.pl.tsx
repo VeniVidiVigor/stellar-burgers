@@ -17,34 +17,6 @@ const REFRESH_TOKEN = 'mock-refresh-token';
 const USER_NAME = 'Тестовый пользователь';
 const ORDER_NUMBER = 98765;
 
-const USER_RESPONSE = {
-  success: true,
-  user: {
-    email: 'test@example.com',
-    name: USER_NAME,
-  },
-};
-
-const ORDER_RESPONSE = {
-  success: true,
-  name: 'Тестовый бургер',
-  order: {
-    _id: 'mock-order-id',
-    status: 'done',
-    name: 'Тестовый бургер',
-    createdAt: '2026-11-17T10:00:00.000Z',
-    updatedAt: '2026-11-17T10:00:00.000Z',
-    number: ORDER_NUMBER,
-    ingredients: [BUN_ID, MAIN_ID, SAUCE_ID, BUN_ID],
-  },
-};
-
-const CORS_HEADERS = {
-  'access-control-allow-origin': '*',
-  'access-control-allow-headers': 'authorization, content-type',
-  'access-control-allow-methods': 'GET, POST, PATCH, OPTIONS',
-};
-
 const getIngredientsSection = (page: Page): Locator => page.locator('section').first();
 
 const getConstructorSection = (page: Page): Locator => page.locator('section').last();
@@ -67,26 +39,6 @@ const addIngredient = async (page: Page, name: string): Promise<void> => {
 
 const openIngredientModal = async (page: Page, name: string): Promise<void> => {
   await getIngredientsSection(page).getByText(name).click();
-};
-
-const mockApiResponse = async (
-  page: Page,
-  url: string,
-  body: unknown
-): Promise<void> => {
-  await page.route(url, async (route) => {
-    if (route.request().method() === 'OPTIONS') {
-      await route.fulfill({ status: 204, headers: CORS_HEADERS });
-      return;
-    }
-
-    await route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      headers: CORS_HEADERS,
-      body: JSON.stringify(body),
-    });
-  });
 };
 
 test.beforeEach(async ({ page }) => {
@@ -192,8 +144,14 @@ test.describe('create order works correctly', () => {
     await page.addInitScript((token) => {
       window.localStorage.setItem('refreshToken', token);
     }, REFRESH_TOKEN);
-    await mockApiResponse(page, '**/api/auth/user', USER_RESPONSE);
-    await mockApiResponse(page, '**/api/orders', ORDER_RESPONSE);
+    await page.routeFromHAR('tests/mocks/user.har', {
+      url: '**/api/auth/user',
+      notFound: 'abort',
+    });
+    await page.routeFromHAR('tests/mocks/order.har', {
+      url: '**/api/orders',
+      notFound: 'abort',
+    });
 
     await page.reload();
 
@@ -201,7 +159,7 @@ test.describe('create order works correctly', () => {
     await expect(getIngredientsSection(page).getByText(BUN_NAME)).toBeVisible();
   });
 
-  test('creates an order and clears the constructor after closing the modal', async ({
+  test('creates an order, clears the constructor and closes the modal', async ({
     page,
   }) => {
     await addIngredient(page, BUN_NAME);
@@ -227,11 +185,15 @@ test.describe('create order works correctly', () => {
     await expect(orderNumber).toBeVisible();
     await expect(modalRoot.getByText('идентификатор заказа')).toBeVisible();
 
+    await expect(burgerConstructor.getByText(BUN_NAME)).toHaveCount(0);
+    await expect(burgerConstructor.getByText(MAIN_NAME)).toHaveCount(0);
+    await expect(burgerConstructor.getByText(SAUCE_NAME)).toHaveCount(0);
+    await expect(burgerConstructor.getByText('Выберите булки')).toHaveCount(2);
+    await expect(burgerConstructor.getByText('Выберите начинку')).toBeVisible();
+
     await modalRoot.getByRole('button', { name: 'Закрыть' }).click();
 
     await expect(orderNumber).toHaveCount(0);
-    await expect(burgerConstructor.getByText('Выберите булки')).toHaveCount(2);
-    await expect(burgerConstructor.getByText('Выберите начинку')).toBeVisible();
-    await expect(burgerConstructor.getByText(MAIN_NAME)).toHaveCount(0);
+    await expect(modalRoot.getByRole('button', { name: 'Закрыть' })).toHaveCount(0);
   });
 });
